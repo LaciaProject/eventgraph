@@ -1,4 +1,3 @@
-```markdown
 # EventGraph
 
 EventGraph 是一个现代的事件系统，旨在为 Python 应用提供高效、灵活的事件处理机制。
