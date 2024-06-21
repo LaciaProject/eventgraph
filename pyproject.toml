@@ -1,6 +1,6 @@
 [project]
 name = "eventgraph"
-version = "0.1.0rc1"
+version = "0.1.0rc2"
 description = "一个现代的事件系统"
 authors = [
     {name = "luxuncang", email = "luxuncang@qq.com"},
