@@ -1,0 +1,21 @@
+[project]
+name = "eventgraph"
+version = "0.1.0rc1"
+description = "一个现代的事件系统"
+authors = [
+    {name = "luxuncang", email = "luxuncang@qq.com"},
+]
+dependencies = [
+    "typing-extensions>=4.12.2",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
