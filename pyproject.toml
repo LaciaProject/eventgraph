@@ -1,12 +1,14 @@
 [project]
 name = "eventgraph"
-version = "0.1.0rc2"
+version = "0.1.0rc3"
 description = "一个现代的事件系统"
 authors = [
     {name = "luxuncang", email = "luxuncang@qq.com"},
 ]
 dependencies = [
     "typing-extensions>=4.12.2",
+    "typing-inspect>=0.9.0",
+    "pydantic>=2.7.4",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

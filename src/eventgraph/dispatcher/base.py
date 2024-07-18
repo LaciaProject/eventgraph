@@ -8,8 +8,11 @@ from typing import (
     MutableMapping,
     Optional,
     Type,
+    Generator
 )
 from dataclasses import dataclass
+
+from ..type_utils import like_isinstance
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -32,16 +35,18 @@ class BaseDispatcher(Protocol[S, E]):
 
 
 class BaseDispatcherManager(Protocol[S, E]):
-    _dispatchers: MutableMapping[E, Type[BaseDispatcher[S, E]]]
+    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[S, E]]]
 
-    def get_dispatcher(self, event: E) -> Optional[Type[BaseDispatcher[S, E]]]: ...
+    def get_dispatcher(self, event: E) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]: ...
 
     def add_dispatcher(
-        self, event: E, dispatcher: Type[BaseDispatcher[S, E]]
+        self, event: Type[E], dispatcher: Type[BaseDispatcher[S, E]]
     ) -> None: ...
 
     def remove_dispatcher(
-        self, event: Optional[E], dispatcher: Optional[Type[BaseDispatcher[S, E]]]
+        self,
+        event: Optional[Type[E]],
+        dispatcher: Optional[Type[BaseDispatcher[S, E]]],
     ) -> None: ...
 
 
@@ -50,20 +55,28 @@ class Dispatcher(Generic[S, E]):
     async def catch(cls, interface: BaseDispatcherInterface[S, E]) -> Any: ...
 
 
-class DispatcherManager(Generic[S, E]):
+class DispatcherManager(Generic[E]):
+    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[DispatcherManager[E], E]]]
+
     def __init__(self):
         self._dispatchers = {}
 
-    def get_dispatcher(self, event: E) -> Optional[Type[BaseDispatcher[S, E]]]:
-        return self._dispatchers.get(event)
+    def get_dispatcher(
+        self, event: E
+    ) -> Generator[Type[BaseDispatcher[DispatcherManager[E], E]], Any, Any]:
+        for k, v in self._dispatchers.items():
+            if like_isinstance(event, k):
+                yield v
 
-    def add_dispatcher(self, event: E, dispatcher: Type[BaseDispatcher[S, E]]) -> None:
+    def add_dispatcher(
+        self, event: Type[E], dispatcher: Type[BaseDispatcher[DispatcherManager[E], E]]
+    ) -> None:
         self._dispatchers[event] = dispatcher
 
     def remove_dispatcher(
         self,
-        event: Optional[E] = None,
-        dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
+        event: Optional[Type[E]] = None,
+        dispatcher: Optional[Type[BaseDispatcher[DispatcherManager[E], E]]] = None,
     ) -> None:
         if event is not None:
             del self._dispatchers[event]
@@ -71,3 +84,9 @@ class DispatcherManager(Generic[S, E]):
             for key, value in self._dispatchers.items():
                 if value == dispatcher:
                     del self._dispatchers[key]
+
+
+# def test(a: BaseDispatcherManager[DispatcherManager[int], int]): ...
+
+
+# test(DispatcherManager[int]())

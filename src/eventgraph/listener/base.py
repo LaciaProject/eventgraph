@@ -15,8 +15,13 @@ class ListenerManager:
     def getListener(self, event):
         for listener in self.listeners:
             for listening_event in listener.listening_events:
-                if event == listening_event:
-                    return listener
+                try:
+                    if event == listening_event:
+                        yield listener
+                    elif isinstance(event, listening_event):
+                        yield listener
+                except Exception:
+                    ...
     
     def register(self, listener: Listener):
         self.listeners.append(listener)

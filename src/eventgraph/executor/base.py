@@ -1,9 +1,18 @@
+from __future__ import annotations
+
 import asyncio
 import inspect
-from typing import Protocol, TypeVar, Generic, Type, Any, get_type_hints
+from typing import (
+    Protocol,
+    TypeVar,
+    Generic,
+    Type,
+    Any,
+    get_type_hints,
+)
 
 from ..queue.base import BaseQueue, BaseTask, PriorityQueue
-from ..listener.base import ListenerManager
+from ..listener.base import ListenerManager, Listener
 from ..dispatcher.base import (
     BaseDispatcherManager,
     BaseDispatcherInterface,
@@ -35,14 +44,11 @@ class BaseExecutor(Protocol[T, S, E]):
     async def execute(self, event: E): ...
 
 
-BaseEventExecutor = BaseExecutor[BaseTask[B_T], S, B_T]
-
-
-class EventExecutor(Generic[S, B_T]):
+class EventExecutor(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
     _listener_manager = InstanceOf(ListenerManager)
     _context_manager = InstanceOf(ContextManager)
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, B_T]]
+    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventExecutor[B_T], B_T]]
 
     _event: asyncio.Event
     _task: asyncio.Task
@@ -77,30 +83,36 @@ class EventExecutor(Generic[S, B_T]):
                     pass
 
     async def execute(self, event: B_T):
-        listener = self._listener_manager.getListener(event)
-        if listener:
-            args, kwargs = await self.get_args(listener.callable, event)
-            await listener.callable(*args, **kwargs)
+        tasks = []
+        for listener in self._listener_manager.getListener(event):
+            tasks.append(self.execute_listener(event, listener))
+        await asyncio.gather(*tasks)
+
+    async def execute_listener(self, event: B_T, listener: Listener):
+        args, kwargs = await self.get_args(listener.callable, event)
+        return await listener.callable(*args, **kwargs)
 
     async def get_args(self, func, event: B_T):
         sig = inspect.signature(func)
         hints = self.get_type_hints(func, include_extras=True)
         args, kwargs = (), {}
-        dispatcher = self._dispatcher_manager.get_dispatcher(event)
-        if not dispatcher:
-            return args, kwargs
-
         for name, param in sig.parameters.items():
-            kwargs[name] = await self.get_args_value(
-                BaseDispatcherInterface[S, B_T](
-                    name=name,
-                    annotation=hints.get(name, Any),
-                    default=param.default,
-                    event=event,
-                    source=self,  # type: ignore
-                ),
-                dispatcher,
-            )
+            for dispatcher in self._dispatcher_manager.get_dispatcher(event):
+                try:
+                    args_value = await self.get_args_value(
+                        BaseDispatcherInterface[EventExecutor[B_T], B_T](
+                            name=name,
+                            annotation=hints.get(name, Any),
+                            default=param.default,
+                            event=event,
+                            source=self,  # type: ignore
+                        ),
+                        dispatcher,
+                    )
+                    kwargs[name] = args_value
+                    break
+                except Exception:
+                    ...
         bound = sig.bind(*args, **kwargs)
         return bound.args, bound.kwargs
 
@@ -128,3 +140,9 @@ class EventExecutor(Generic[S, B_T]):
         return get_type_hints(
             func, globalns=globalns, localns=localns, include_extras=include_extras
         )
+
+
+# def test(a: BaseExecutor[BaseTask[int], EventExecutor[int], int]): ...
+
+
+# test(EventExecutor[int]())

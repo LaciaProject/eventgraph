@@ -29,23 +29,23 @@ import asyncio
 from eventgraph.core.core import EventGraph, init_event_graph
 from eventgraph.dispatcher.base import Dispatcher
 from eventgraph.context import InstanceContext
+
 from eventgraph.exceptions import NoCatchArgs
 
 g = init_event_graph(int, InstanceContext())
-
 ```
 
 2. 定义事件处理函数：
 
 ```python
-@g.receiver(1)
+@g.receiver(int)
 async def test1(a: int, b: str, c=1):
-    print(locals())
+    print(locals(), "test1")
 
 
-@g.receiver(2)
-async def test2(a: int, b: str, c=1):
-    print(locals())
+@g.receiver(Ts)
+async def test2(a: Ts, b: str, c=1, d: Optional[EventGraph] = None):
+    print(locals(), "test2")
 
 ```
 
@@ -56,14 +56,11 @@ async def test2(a: int, b: str, c=1):
 class IntDispatcher(Dispatcher[EventGraph[int], int]):
     @classmethod
     async def catch(cls, interface):
-        if interface.annotation == int:
-            return interface.event
-        elif interface.annotation == str:
+        if interface.annotation == str:
             return "string"
         raise NoCatchArgs
 
-g.add_dispatcher(1, IntDispatcher)
-g.add_dispatcher(2, IntDispatcher)
+g.add_dispatcher(int, IntDispatcher)
 ```
 
 4. 发布和执行事件：
@@ -72,8 +69,8 @@ g.add_dispatcher(2, IntDispatcher)
 async def mian():
     g.start()
     g.postEvent(1) # 发布事件
-    g.postEvent(2)
-    await g.execute(1) # 直接执行事件
+    g.postEvent(Ts(2))
+    await g.execute(Ts(1)) # 直接执行事件
     await asyncio.sleep(1)
 
 asyncio.run(mian())

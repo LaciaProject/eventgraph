@@ -1,4 +1,5 @@
-from typing import TypeVar, Generic, Callable, Type
+from __future__ import annotations
+from typing import TypeVar, Generic, Callable, Type, Protocol, Optional, Generator, Any
 
 from ..queue.base import BaseQueue, BaseTask, PriorityQueue
 from ..listener.base import ListenerManager, Listener
@@ -12,7 +13,7 @@ E = TypeVar("E")
 B_T = TypeVar("B_T")
 
 
-class BaseSource(BaseDispatcherManager[S, E], Generic[T, S, E]):
+class BaseSource(Protocol[T, S, E]):
     _queue: InstanceOf[BaseQueue[T]]
     _listener_manager: InstanceOf[ListenerManager]
     _context_manager: InstanceOf[ContextManager]
@@ -20,22 +21,33 @@ class BaseSource(BaseDispatcherManager[S, E], Generic[T, S, E]):
 
     def postEvent(self, event: E, priority: int = 16): ...
 
-    def receiver(self, event: E) -> Callable: ...
+    def receiver(self, event: Type[E]) -> Callable: ...
+
+    def get_dispatcher(
+        self, event: E
+    ) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]: ...
+
+    def add_dispatcher(
+        self, event: Type[E], dispatcher: Type[BaseDispatcher[S, E]]
+    ) -> None: ...
+
+    def remove_dispatcher(
+        self,
+        event: Optional[Type[E]],
+        dispatcher: Optional[Type[BaseDispatcher[S, E]]],
+    ) -> None: ...
 
 
-BaseEventSource = BaseSource[BaseTask[B_T], S, B_T]
-
-
-class EventSource(Generic[S, B_T]):
+class EventSource(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
     _listener_manager = InstanceOf(ListenerManager)
     _context_manager = InstanceOf(ContextManager)
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, B_T]]
+    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventSource[B_T], B_T]]
 
     def postEvent(self, event: B_T, priority: int = 16):
         self._queue.put_nowait(BaseTask(priority, event))
 
-    def receiver(self, event: B_T):
+    def receiver(self, event: Type[B_T]):
         def receiver_wrapper(callable_target):
             listener = Listener(callable=callable_target, listening_events=[event])
             self._listener_manager.register(listener)
@@ -43,11 +55,25 @@ class EventSource(Generic[S, B_T]):
 
         return receiver_wrapper
 
-    def get_dispatcher(self, event: B_T) -> Type[BaseDispatcher[S, B_T]] | None:
-        return self._dispatcher_manager.get_dispatcher(event)
+    def get_dispatcher(
+        self, event: B_T
+    ) -> Generator[Type[BaseDispatcher[EventSource[B_T], B_T]], Any, Any]:
+        yield from self._dispatcher_manager.get_dispatcher(event)
 
-    def add_dispatcher(self, event: B_T, dispatcher: Type[BaseDispatcher[S, B_T]]):
+    def add_dispatcher(
+        self, event: Type[B_T], dispatcher: Type[BaseDispatcher[EventSource[B_T], B_T]]
+    ):
         self._dispatcher_manager.add_dispatcher(event, dispatcher)
 
-    def remove_dispatcher(self, event: B_T, dispatcher: Type[BaseDispatcher[S, B_T]]):
+    def remove_dispatcher(
+        self,
+        event: Optional[Type[B_T]],
+        dispatcher: Optional[Type[BaseDispatcher[EventSource[B_T], B_T]]],
+    ):
         self._dispatcher_manager.remove_dispatcher(event, dispatcher)
+
+
+# def test(a: BaseSource[BaseTask[int], EventSource[int], int]): ...
+
+
+# test(EventSource[int]())
