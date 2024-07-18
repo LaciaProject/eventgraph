@@ -38,6 +38,8 @@ g = init_event_graph(int, InstanceContext())
 2. 定义事件处理函数：
 
 ```python
+class Ts(int): ...
+
 @g.receiver(int)
 async def test1(a: int, b: str, c=1):
     print(locals(), "test1")
