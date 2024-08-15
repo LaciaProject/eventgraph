@@ -6,7 +6,7 @@ from pydantic import Field
 
 from eventgraph.core.core import EventGraph, init_event_graph
 from eventgraph.dispatcher.base import Dispatcher
-from eventgraph.context import InstanceContext
+from mapgraph.context import InstanceContext
 
 from eventgraph.exceptions import NoCatchArgs
 

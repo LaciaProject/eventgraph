@@ -8,11 +8,11 @@ from typing import (
     MutableMapping,
     Optional,
     Type,
-    Generator
+    Generator,
 )
 from dataclasses import dataclass
 
-from ..type_utils import like_isinstance
+from mapgraph.type_utils import like_isinstance
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -37,7 +37,9 @@ class BaseDispatcher(Protocol[S, E]):
 class BaseDispatcherManager(Protocol[S, E]):
     _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[S, E]]]
 
-    def get_dispatcher(self, event: E) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]: ...
+    def get_dispatcher(
+        self, event: E
+    ) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]: ...
 
     def add_dispatcher(
         self, event: Type[E], dispatcher: Type[BaseDispatcher[S, E]]
@@ -55,28 +57,28 @@ class Dispatcher(Generic[S, E]):
     async def catch(cls, interface: BaseDispatcherInterface[S, E]) -> Any: ...
 
 
-class DispatcherManager(Generic[E]):
-    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[DispatcherManager[E], E]]]
+class DispatcherManager(Generic[S, E]):
+    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[S, E]]]
 
     def __init__(self):
         self._dispatchers = {}
 
     def get_dispatcher(
         self, event: E
-    ) -> Generator[Type[BaseDispatcher[DispatcherManager[E], E]], Any, Any]:
+    ) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]:
         for k, v in self._dispatchers.items():
             if like_isinstance(event, k):
                 yield v
 
     def add_dispatcher(
-        self, event: Type[E], dispatcher: Type[BaseDispatcher[DispatcherManager[E], E]]
+        self, event: Type[E], dispatcher: Type[BaseDispatcher[S, E]]
     ) -> None:
         self._dispatchers[event] = dispatcher
 
     def remove_dispatcher(
         self,
         event: Optional[Type[E]] = None,
-        dispatcher: Optional[Type[BaseDispatcher[DispatcherManager[E], E]]] = None,
+        dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
     ) -> None:
         if event is not None:
             del self._dispatchers[event]
@@ -85,8 +87,3 @@ class DispatcherManager(Generic[E]):
                 if value == dispatcher:
                     del self._dispatchers[key]
 
-
-# def test(a: BaseDispatcherManager[DispatcherManager[int], int]): ...
-
-
-# test(DispatcherManager[int]())

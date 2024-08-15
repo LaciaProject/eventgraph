@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import TypeVar, Generic, Callable, Type, Protocol, Optional, Generator, Any
 
+from mapgraph.instance_of import InstanceOf
+
 from ..queue.base import BaseQueue, BaseTask, PriorityQueue
 from ..listener.base import ListenerManager, Listener
 from ..dispatcher.base import BaseDispatcherManager, BaseDispatcher
-from ..context import ContextManager
-from ..instance_of import InstanceOf
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -16,7 +16,6 @@ B_T = TypeVar("B_T")
 class BaseSource(Protocol[T, S, E]):
     _queue: InstanceOf[BaseQueue[T]]
     _listener_manager: InstanceOf[ListenerManager]
-    _context_manager: InstanceOf[ContextManager]
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, E]]
 
     def postEvent(self, event: E, priority: int = 16): ...
@@ -41,7 +40,6 @@ class BaseSource(Protocol[T, S, E]):
 class EventSource(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
     _listener_manager = InstanceOf(ListenerManager)
-    _context_manager = InstanceOf(ContextManager)
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventSource[B_T], B_T]]
 
     def postEvent(self, event: B_T, priority: int = 16):

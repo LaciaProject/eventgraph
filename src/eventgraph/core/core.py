@@ -2,6 +2,11 @@ from __future__ import annotations
 
 from typing import TypeVar, Type, cast, Any, Generator, Optional
 
+from mapgraph.context import InstanceContext
+from mapgraph.instance_of import InstanceOf, is_instance
+from mapgraph.globals import GLOBAL_INSTANCE_CONTEXT
+from mapgraph.type_utils import like_isinstance, like_issubclass
+
 from .base import BaseEventGraph
 from ..source.base import EventSource
 from ..executor.base import EventExecutor
@@ -13,12 +18,7 @@ from ..dispatcher.base import (
     Dispatcher,
     BaseDispatcher,
 )
-from ..context import ContextManager, InstanceContext
-from ..globals import GLOBAL_INSTANCE_CONTEXT
-from ..instance_of import InstanceOf
 from ..exceptions import NoCatchArgs
-
-from ..type_utils import like_isinstance, like_issubclass
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -66,16 +66,15 @@ def init_event_graph(
     event: Type[T], context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
 ) -> BaseEventGraph[BaseTask[T], EventGraph[T], T]:
     default_context = context
-    if not default_context.is_target(PriorityQueue[event]):
-        default_context.instances[PriorityQueue[event]] = PriorityQueue[event]()
-    if not default_context.is_target(ListenerManager):
-        default_context.instances[ListenerManager] = ListenerManager()
-    if not default_context.is_target(ContextManager):
-        default_context.instances[ContextManager] = ContextManager()
-    if not default_context.is_target(BaseDispatcherManager[EventGraph[event], event]):
-        dm = DispatcherManager[EventGraph[event]]()
+
+    if not is_instance(PriorityQueue[event]):
+        default_context.store(PriorityQueue[event]())
+    if not is_instance(ListenerManager):
+        default_context.store(ListenerManager())
+    if not is_instance(BaseDispatcherManager[EventGraph[event], event]):
+        dm = DispatcherManager[EventGraph[event], event]()
         dm.add_dispatcher(Any, AnyDispatcher)  # type: ignore
-        default_context.instances[BaseDispatcherManager[EventGraph[event], event]] = dm
+        default_context.store(dm)
 
     return cast(
         BaseEventGraph[BaseTask[T], EventGraph[T], T],
@@ -85,7 +84,6 @@ def init_event_graph(
             {
                 "_queue": InstanceOf(PriorityQueue[event]),
                 "_listener_manager": InstanceOf(ListenerManager),
-                "_context_manager": InstanceOf(ContextManager),
                 "_dispatcher_manager": InstanceOf(
                     BaseDispatcherManager[EventGraph[event], event]
                 ),

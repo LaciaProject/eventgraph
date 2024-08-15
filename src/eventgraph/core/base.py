@@ -1,13 +1,11 @@
 from typing import TypeVar, Protocol, Type, Callable, Optional, Generator, Any
 
-from ..source.base import BaseSource
-from ..executor.base import BaseExecutor
-from ..context import InstanceContext, ContextManager
+from mapgraph.context import InstanceContext
+from mapgraph.instance_of import InstanceOf
+
 from ..listener.base import ListenerManager
 from ..dispatcher.base import BaseDispatcherManager, BaseDispatcher
 from ..queue.base import BaseQueue
-
-from ..instance_of import InstanceOf
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -21,7 +19,6 @@ E = TypeVar("E")
 class BaseEventGraph(Protocol[T, S, E]):
     _queue: InstanceOf[BaseQueue[T]]
     _listener_manager: InstanceOf[ListenerManager]
-    _context_manager: InstanceOf[ContextManager]
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, E]]
     _context: InstanceContext
 

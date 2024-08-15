@@ -11,6 +11,8 @@ from typing import (
     get_type_hints,
 )
 
+from mapgraph.instance_of import InstanceOf
+
 from ..queue.base import BaseQueue, BaseTask, PriorityQueue
 from ..listener.base import ListenerManager, Listener
 from ..dispatcher.base import (
@@ -18,8 +20,6 @@ from ..dispatcher.base import (
     BaseDispatcherInterface,
     BaseDispatcher,
 )
-from ..context import ContextManager
-from ..instance_of import InstanceOf
 
 from ..exceptions import NoCatchArgs
 
@@ -32,7 +32,6 @@ B_T = TypeVar("B_T")
 class BaseExecutor(Protocol[T, S, E]):
     _queue: InstanceOf[BaseQueue[T]]
     _listener_manager: InstanceOf[ListenerManager]
-    _context_manager: InstanceOf[ContextManager]
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, E]]
 
     def start(self): ...
@@ -47,7 +46,6 @@ class BaseExecutor(Protocol[T, S, E]):
 class EventExecutor(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
     _listener_manager = InstanceOf(ListenerManager)
-    _context_manager = InstanceOf(ContextManager)
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventExecutor[B_T], B_T]]
 
     _event: asyncio.Event
