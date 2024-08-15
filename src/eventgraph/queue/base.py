@@ -38,7 +38,22 @@ class PriorityQueue(asyncio.PriorityQueue, Generic[V]):
     def __init__(self, maxsize: int = 0) -> None:
         super().__init__(maxsize=maxsize)
 
-    def put_nowait(self, item: BaseTask[V]):
+    def qsize(self) -> int:
+        return super().qsize()
+
+    def empty(self) -> bool:
+        return super().empty()
+
+    def full(self) -> bool:
+        return super().full()
+
+    def task_done(self) -> None:
+        return super().task_done()
+
+    async def join(self) -> None:
+        return await super().join()
+
+    def put_nowait(self, item: BaseTask[V]) -> None:
         super().put_nowait((item.priority, item.data))
 
     def get_nowait(self) -> BaseTask[V]:

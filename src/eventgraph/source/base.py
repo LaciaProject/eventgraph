@@ -39,13 +39,13 @@ class BaseSource(Protocol[T, S, E]):
 
 class EventSource(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
-    _listener_manager = InstanceOf(ListenerManager)
+    _listener_manager: InstanceOf[ListenerManager] = InstanceOf(ListenerManager)
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventSource[B_T], B_T]]
 
-    def postEvent(self, event: B_T, priority: int = 16):
+    def postEvent(self, event: B_T, priority: int = 16) -> None:
         self._queue.put_nowait(BaseTask(priority, event))
 
-    def receiver(self, event: Type[B_T]):
+    def receiver(self, event: Type[B_T]) -> Callable:
         def receiver_wrapper(callable_target):
             listener = Listener(callable=callable_target, listening_events=[event])
             self._listener_manager.register(listener)

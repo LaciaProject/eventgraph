@@ -1,17 +1,13 @@
 import asyncio
-import time
 
-from typing import Annotated, Optional
-from pydantic import Field
+from typing import Optional
 
 from eventgraph.core.core import EventGraph, init_event_graph
 from eventgraph.dispatcher.base import Dispatcher
-from mapgraph.context import InstanceContext
 
 from eventgraph.exceptions import NoCatchArgs
 
-
-g = init_event_graph(int, InstanceContext())
+g = init_event_graph(int)
 
 
 class Ts(int): ...

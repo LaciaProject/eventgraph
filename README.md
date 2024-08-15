@@ -28,11 +28,10 @@ pip install eventgraph>=0.1.0rc3
 import asyncio
 from eventgraph.core.core import EventGraph, init_event_graph
 from eventgraph.dispatcher.base import Dispatcher
-from eventgraph.context import InstanceContext
 
 from eventgraph.exceptions import NoCatchArgs
 
-g = init_event_graph(int, InstanceContext())
+g = init_event_graph(int)
 ```
 
 2. 定义事件处理函数：

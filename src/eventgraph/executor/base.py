@@ -45,19 +45,19 @@ class BaseExecutor(Protocol[T, S, E]):
 
 class EventExecutor(Generic[B_T]):
     _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
-    _listener_manager = InstanceOf(ListenerManager)
+    _listener_manager: InstanceOf[ListenerManager] = InstanceOf(ListenerManager)
     _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventExecutor[B_T], B_T]]
 
     _event: asyncio.Event
     _task: asyncio.Task
 
-    def start(self):
+    def start(self) -> None:
         if not hasattr(self, "_event"):
             self._event = asyncio.Event()
             loop = asyncio.get_event_loop()
             self._task = loop.create_task(self.loop())
 
-    async def loop(self):
+    async def loop(self) -> None:
         try:
             loop = asyncio.get_event_loop()
             while not self._event.is_set():
@@ -69,7 +69,7 @@ class EventExecutor(Generic[B_T]):
         finally:
             await self.stop()
 
-    async def stop(self):
+    async def stop(self) -> None:
         if hasattr(self, "_event"):
             self._event.set()
 
@@ -80,7 +80,7 @@ class EventExecutor(Generic[B_T]):
                 except asyncio.CancelledError:
                     pass
 
-    async def execute(self, event: B_T):
+    async def execute(self, event: B_T) -> None:
         tasks = []
         for listener in self._listener_manager.getListener(event):
             tasks.append(self.execute_listener(event, listener))

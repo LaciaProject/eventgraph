@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TypeVar, Type, cast, Any, Generator, Optional
+from typing import TypeVar, Type, Any, Generator, Optional
 
 from mapgraph.context import InstanceContext
 from mapgraph.instance_of import InstanceOf, is_instance
@@ -25,19 +25,21 @@ T = TypeVar("T")
 
 
 class EventGraph(EventSource[T], EventExecutor[T]):
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventGraph[T], T]]
+    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventGraph[T], T]] = (
+        InstanceOf(BaseDispatcherManager)
+    )
     _context: InstanceContext
 
     def add_dispatcher(
         self, event: Type[T], dispatcher: Type[BaseDispatcher[EventGraph[T], T]]
-    ):
+    ) -> None:
         self._dispatcher_manager.add_dispatcher(event, dispatcher)
 
     def remove_dispatcher(
         self,
         event: Optional[Type[T]],
         dispatcher: Optional[Type[BaseDispatcher[EventGraph[T], T]]],
-    ):
+    ) -> None:
         self._dispatcher_manager.remove_dispatcher(event, dispatcher)
 
     def get_dispatcher(
@@ -56,10 +58,10 @@ class AnyDispatcher(Dispatcher[EventGraph[T], T]):
         raise NoCatchArgs("No catch arguments provided")
 
 
-# def test(a: BaseEventGraph[BaseTask[int], EventGraph[int], int]): ...
+# def test1(a: BaseEventGraph[BaseTask[int], EventGraph[int], int]): ...
 
 
-# test(EventGraph[int]())
+# test1(EventGraph[int]())
 
 
 def init_event_graph(
@@ -76,18 +78,7 @@ def init_event_graph(
         dm.add_dispatcher(Any, AnyDispatcher)  # type: ignore
         default_context.store(dm)
 
-    return cast(
-        BaseEventGraph[BaseTask[T], EventGraph[T], T],
-        type(
-            f"{event.__name__}EventGraph",
-            (EventGraph,),
-            {
-                "_queue": InstanceOf(PriorityQueue[event]),
-                "_listener_manager": InstanceOf(ListenerManager),
-                "_dispatcher_manager": InstanceOf(
-                    BaseDispatcherManager[EventGraph[event], event]
-                ),
-                "_context": default_context,
-            },
-        )(),
-    )
+    obj = EventGraph[event]()
+    obj._context = default_context
+
+    return obj
