@@ -5,7 +5,6 @@ from typing import (
     Any,
     TypeVar,
     Generic,
-    MutableMapping,
     Optional,
     Type,
     Generator,
@@ -35,7 +34,7 @@ class BaseDispatcher(Protocol[S, E]):
 
 
 class BaseDispatcherManager(Protocol[S, E]):
-    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[S, E]]]
+    _dispatchers: list[tuple[Type[E], Type[BaseDispatcher[S, E]]]]
 
     def get_dispatcher(
         self, event: E
@@ -58,32 +57,36 @@ class Dispatcher(Generic[S, E]):
 
 
 class DispatcherManager(Generic[S, E]):
-    _dispatchers: MutableMapping[Type[E], Type[BaseDispatcher[S, E]]]
+    _dispatchers: list[tuple[Type[E], Type[BaseDispatcher[S, E]]]]
 
     def __init__(self):
-        self._dispatchers = {}
+        self._dispatchers = []
 
     def get_dispatcher(
         self, event: E
     ) -> Generator[Type[BaseDispatcher[S, E]], Any, Any]:
-        for k, v in self._dispatchers.items():
+        for k, v in self._dispatchers:
             if like_isinstance(event, k):
                 yield v
 
     def add_dispatcher(
         self, event: Type[E], dispatcher: Type[BaseDispatcher[S, E]]
     ) -> None:
-        self._dispatchers[event] = dispatcher
+        self._dispatchers.append((event, dispatcher))
 
     def remove_dispatcher(
-        self,
-        event: Optional[Type[E]] = None,
-        dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
-    ) -> None:
-        if event is not None:
-            del self._dispatchers[event]
-        if dispatcher is not None:
-            for key, value in self._dispatchers.items():
-                if value == dispatcher:
-                    del self._dispatchers[key]
-
+            self,
+            event: Optional[Type[E]] = None,
+            dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
+        ) -> None:
+            to_remove = []
+            if event is not None:
+                for key, value in self._dispatchers:
+                    if key == event:
+                        to_remove.append((key, value))
+            if dispatcher is not None:
+                for key, value in self._dispatchers:
+                    if value == dispatcher:
+                        to_remove.append((key, value))
+            for item in to_remove:
+                self._dispatchers.remove(item)

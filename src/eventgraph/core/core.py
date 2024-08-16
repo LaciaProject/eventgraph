@@ -5,7 +5,7 @@ from typing import TypeVar, Type, Any, Generator, Optional
 from mapgraph.context import InstanceContext
 from mapgraph.instance_of import InstanceOf, is_instance
 from mapgraph.globals import GLOBAL_INSTANCE_CONTEXT
-from mapgraph.type_utils import like_isinstance, like_issubclass
+from mapgraph.type_utils import like_isinstance
 
 from .base import BaseEventGraph
 from ..source.base import EventSource
@@ -51,7 +51,7 @@ class EventGraph(EventSource[T], EventExecutor[T]):
 class AnyDispatcher(Dispatcher[EventGraph[T], T]):
     @classmethod
     async def catch(cls, interface):
-        if like_issubclass(EventGraph, interface.annotation):
+        if like_isinstance(interface.source, interface.annotation):
             return interface.source
         elif like_isinstance(interface.event, interface.annotation):
             return interface.event
@@ -65,7 +65,7 @@ class AnyDispatcher(Dispatcher[EventGraph[T], T]):
 
 
 def init_event_graph(
-    event: Type[T] | Any, context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
+    event: Type[T], context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
 ) -> BaseEventGraph[BaseTask[T], EventGraph[T], T]:
     default_context = context
 
@@ -75,7 +75,7 @@ def init_event_graph(
         default_context.store(ListenerManager())
     if not is_instance(BaseDispatcherManager[EventGraph[event], event]):
         dm = DispatcherManager[EventGraph[event], event]()
-        dm.add_dispatcher(Any, AnyDispatcher)  # type: ignore
+        dm.add_dispatcher(event, AnyDispatcher[event])
         default_context.store(dm)
 
     obj = EventGraph[event]()
