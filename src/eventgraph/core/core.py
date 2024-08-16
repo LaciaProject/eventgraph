@@ -65,7 +65,7 @@ class AnyDispatcher(Dispatcher[EventGraph[T], T]):
 
 
 def init_event_graph(
-    event: Type[T], context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
+    event: Type[T] | Any, context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
 ) -> BaseEventGraph[BaseTask[T], EventGraph[T], T]:
     default_context = context
 

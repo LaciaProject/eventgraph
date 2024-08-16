@@ -17,7 +17,7 @@ EventGraph 是一个现代的事件系统，旨在为 Python 应用提供高效�
 使用 pip 安装 EventGraph：
 
 ```sh
-pip install eventgraph>=0.1.0rc3
+pip install eventgraph>=0.1.0rc6
 ```
 
 ### 基本用法
