@@ -103,7 +103,7 @@ class EventExecutor(Generic[B_T]):
                             annotation=hints.get(name, Any),
                             default=param.default,
                             event=event,
-                            source=self,  # type: ignore
+                            source=self,
                         ),
                         dispatcher,
                     )

@@ -1,6 +1,8 @@
 from typing import Callable, Any, overload
 from dataclasses import dataclass
 
+from mapgraph.type_utils import like_isinstance
+
 @dataclass
 class Listener:
     callable: Callable
@@ -18,7 +20,7 @@ class ListenerManager:
                 try:
                     if event == listening_event:
                         yield listener
-                    elif isinstance(event, listening_event):
+                    elif like_isinstance(event, listening_event):
                         yield listener
                 except Exception:
                     ...

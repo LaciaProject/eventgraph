@@ -33,6 +33,9 @@ class BaseTask(Generic[V]):
     priority: int
     data: V
 
+    def __lt__(self, other: "BaseTask") -> bool:
+        return self.priority < other.priority
+
 
 class PriorityQueue(asyncio.PriorityQueue, Generic[V]):
     def __init__(self, maxsize: int = 0) -> None:
@@ -54,11 +57,10 @@ class PriorityQueue(asyncio.PriorityQueue, Generic[V]):
         return await super().join()
 
     def put_nowait(self, item: BaseTask[V]) -> None:
-        super().put_nowait((item.priority, item.data))
+        super().put_nowait(item)
 
     def get_nowait(self) -> BaseTask[V]:
-        priority, data = super().get_nowait()
-        return BaseTask(priority=priority, data=data)
+        return super().get_nowait()
 
     async def put(self, item: BaseTask[V]) -> None:
         await super().put(item)
