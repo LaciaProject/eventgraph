@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TypeVar, Generic, Callable, Type, Protocol, Optional, Generator, Any
 
-from mapgraph.instance_of import InstanceOf
+from mapgraph.instance_of import InstanceOfV, InstanceOf
 
 from ..queue.base import BaseQueue, BaseTask, PriorityQueue
 from ..listener.base import ListenerManager, Listener
@@ -14,9 +14,9 @@ B_T = TypeVar("B_T")
 
 
 class BaseSource(Protocol[T, S, E]):
-    _queue: InstanceOf[BaseQueue[T]]
-    _listener_manager: InstanceOf[ListenerManager]
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[S, E]]
+    _queue: InstanceOfV[BaseQueue[T]]
+    _listener_manager: InstanceOfV[ListenerManager]
+    _dispatcher_manager: InstanceOfV[BaseDispatcherManager[S, E]]
 
     def postEvent(self, event: E, priority: int = 16): ...
 
@@ -38,9 +38,9 @@ class BaseSource(Protocol[T, S, E]):
 
 
 class EventSource(Generic[B_T]):
-    _queue: InstanceOf[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
-    _listener_manager: InstanceOf[ListenerManager] = InstanceOf(ListenerManager)
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventSource[B_T], B_T]]
+    _queue: InstanceOfV[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
+    _listener_manager: InstanceOfV[ListenerManager] = InstanceOf(ListenerManager)
+    _dispatcher_manager: InstanceOfV[BaseDispatcherManager[EventSource[B_T], B_T]]
 
     def postEvent(self, event: B_T, priority: int = 16) -> None:
         self._queue.put_nowait(BaseTask(priority, event))
@@ -69,9 +69,3 @@ class EventSource(Generic[B_T]):
         dispatcher: Optional[Type[BaseDispatcher[EventSource[B_T], B_T]]],
     ):
         self._dispatcher_manager.remove_dispatcher(event, dispatcher)
-
-
-# def test(a: BaseSource[BaseTask[int], EventSource[int], int]): ...
-
-
-# test(EventSource[int]())

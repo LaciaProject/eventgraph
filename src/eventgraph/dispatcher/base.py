@@ -11,7 +11,7 @@ from typing import (
 )
 from dataclasses import dataclass
 
-from mapgraph.type_utils import like_isinstance
+from typing_tool.type_utils import like_isinstance
 
 S = TypeVar("S")
 T = TypeVar("T")

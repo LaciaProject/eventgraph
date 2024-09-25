@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from typing import Protocol, TypeVar, Generic
 
@@ -33,7 +35,7 @@ class BaseTask(Generic[V]):
     priority: int
     data: V
 
-    def __lt__(self, other: "BaseTask") -> bool:
+    def __lt__(self, other: BaseTask) -> bool:
         return self.priority < other.priority
 
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TypeVar, Type, Any, Generator, Optional
 
 from mapgraph.context import InstanceContext
-from mapgraph.instance_of import InstanceOf, is_instance
 from mapgraph.globals import GLOBAL_INSTANCE_CONTEXT
-from mapgraph.type_utils import like_isinstance
+from mapgraph.instance_of import InstanceOf, is_instance, InstanceOfV
+from typing_tool.type_utils import like_isinstance
 
 from .base import BaseEventGraph
 from ..source.base import EventSource
@@ -25,10 +25,9 @@ T = TypeVar("T")
 
 
 class EventGraph(EventSource[T], EventExecutor[T]):
-    _dispatcher_manager: InstanceOf[BaseDispatcherManager[EventGraph[T], T]] = (
+    _dispatcher_manager: InstanceOfV[BaseDispatcherManager[EventGraph[T], T]] = (
         InstanceOf(BaseDispatcherManager)
     )
-    _context: InstanceContext
 
     def add_dispatcher(
         self, event: Type[T], dispatcher: Type[BaseDispatcher[EventGraph[T], T]]
@@ -58,17 +57,10 @@ class AnyDispatcher(Dispatcher[EventGraph[T], T]):
         raise NoCatchArgs("No catch arguments provided")
 
 
-# def test1(a: BaseEventGraph[BaseTask[int], EventGraph[int], int]): ...
-
-
-# test1(EventGraph[int]())
-
-
 def init_event_graph(
-    event: Type[T] | Any, context: InstanceContext = GLOBAL_INSTANCE_CONTEXT
+    event: Type[T] | Any,
+    default_context: InstanceContext = GLOBAL_INSTANCE_CONTEXT,
 ) -> BaseEventGraph[BaseTask[T], EventGraph[T], T]:
-    default_context = context
-
     if not is_instance(PriorityQueue[event]):
         default_context.store(PriorityQueue[event]())
     if not is_instance(ListenerManager):
@@ -79,6 +71,5 @@ def init_event_graph(
         default_context.store(dm)
 
     obj = EventGraph[event]()
-    obj._context = default_context
 
     return obj

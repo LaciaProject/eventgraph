@@ -1,12 +1,14 @@
 from typing import Callable, Any, overload
 from dataclasses import dataclass
 
-from mapgraph.type_utils import like_isinstance
+from typing_tool import like_isinstance
+
 
 @dataclass
 class Listener:
     callable: Callable
     listening_events: list[Any]
+
 
 class ListenerManager:
     listeners: list[Listener]
@@ -24,16 +26,14 @@ class ListenerManager:
                         yield listener
                 except Exception:
                     ...
-    
+
     def register(self, listener: Listener):
         self.listeners.append(listener)
 
     @overload
-    def removeListener(self, listener: Listener):
-        ...
+    def removeListener(self, listener: Listener): ...
     @overload
-    def removeListener(self, listener: Callable):
-        ...
+    def removeListener(self, listener: Callable): ...
 
     def removeListener(self, listener):
         remove_listener = []
