@@ -77,6 +77,8 @@ async def mian():
 asyncio.run(mian())
 ```
 
+> init_event_graph(type_var) 如果 type_var 相同，返回的 EventGraph 实例天然具有同类型的所有 `事件处理器` 与 `参数处理器`。
+
 ## 鸣谢
 
 * [Graia 社区](https://github.com/GraiaProject)

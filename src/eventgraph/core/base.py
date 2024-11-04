@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TypeVar, Protocol, Type, Callable, Optional, Generator, Any
 
 from mapgraph.instance_of import InstanceOfV
@@ -41,3 +43,5 @@ class BaseEventGraph(Protocol[T, S, E]):
         event: Optional[Type[E]],
         dispatcher: Optional[Type[BaseDispatcher[S, E]]],
     ) -> None: ...
+
+    def merge(self, other: BaseEventGraph[T, S, E]) -> None: ...

@@ -46,6 +46,10 @@ class EventGraph(EventSource[T], EventExecutor[T]):
     ) -> Generator[Type[BaseDispatcher[EventGraph[T], T]], Any, Any]:
         yield from self._dispatcher_manager.get_dispatcher(event)
 
+    def merge(self, other: BaseEventGraph[BaseTask[T], EventGraph[T], T]) -> None:
+        self._dispatcher_manager.merge(other._dispatcher_manager)
+        self._listener_manager.merge(other._listener_manager)
+
 
 class AnyDispatcher(Dispatcher[EventGraph[T], T]):
     @classmethod

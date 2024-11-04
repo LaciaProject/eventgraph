@@ -109,6 +109,8 @@ class EventExecutor(Generic[B_T]):
                     break
                 except Exception:
                     ...
+            if name not in kwargs:
+                raise NoCatchArgs(f"`{param}` is required")
         bound = sig.bind(*args, **kwargs)
         return bound.args, bound.kwargs
 

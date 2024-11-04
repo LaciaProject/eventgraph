@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:01eaab5ec17b03e5394fe4c5aa42f14966238ed5b99d9afb77ee747422c19ec6"
+content_hash = "sha256:5e5852b533d95e6c657b09a5da68ac4f02564c6e709e031fea42edf67d8148d1"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -99,18 +99,19 @@ files = [
 
 [[package]]
 name = "mapgraph"
-version = "0.2.1"
+version = "0.2.2"
 requires_python = ">=3.10"
 summary = "一个强大的对象控制工具, 覆盖了配置管理、状态管理、上下文管理和生命周期管理。"
 groups = ["default"]
 dependencies = [
     "launart>=0.8.2",
+    "networkx>=3.4.2",
     "python-dotenv>=1.0.1",
-    "typing-tool>=0.1.0",
+    "typing-tool>=0.1.2",
 ]
 files = [
-    {file = "mapgraph-0.2.1-py3-none-any.whl", hash = "sha256:35819dd007e5ffd080cbcd6d476a0a81da0fd5bc93108dee74ab91479c0695bd"},
-    {file = "mapgraph-0.2.1.tar.gz", hash = "sha256:d44c1621bd7bc4be187c3d790917607972909f18a265a58bfb77a7a218f351b5"},
+    {file = "mapgraph-0.2.2-py3-none-any.whl", hash = "sha256:82f290658e98484eb2553a594dd69b5cba838cf77fead4c6a208f54bcb882332"},
+    {file = "mapgraph-0.2.2.tar.gz", hash = "sha256:b10c5409663c427fa02c8d097fadf021a2f57bfb45c77588dd42b247a2299044"},
 ]
 
 [[package]]
@@ -122,6 +123,17 @@ groups = ["default"]
 files = [
     {file = "mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d"},
     {file = "mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"},
+]
+
+[[package]]
+name = "networkx"
+version = "3.4.2"
+requires_python = ">=3.10"
+summary = "Python package for creating and manipulating graphs and networks"
+groups = ["default"]
+files = [
+    {file = "networkx-3.4.2-py3-none-any.whl", hash = "sha256:df5d4365b724cf81b8c6a7312509d0c22386097011ad1abe274afd5e9d3bbc5f"},
+    {file = "networkx-3.4.2.tar.gz", hash = "sha256:307c3669428c5362aab27c8a1260aa8f47c4e91d3891f48be0141738d8d053e1"},
 ]
 
 [[package]]
@@ -260,7 +272,7 @@ files = [
 
 [[package]]
 name = "typing-tool"
-version = "0.1.0"
+version = "0.1.2"
 requires_python = ">=3.10"
 summary = "python typing tool"
 groups = ["default"]
@@ -270,8 +282,8 @@ dependencies = [
     "typing-inspect>=0.9.0",
 ]
 files = [
-    {file = "typing_tool-0.1.0-py3-none-any.whl", hash = "sha256:704dc3c025261ba2f383f8180f1b02e4b9c7e7099b90323102eb4f5f979e96dd"},
-    {file = "typing_tool-0.1.0.tar.gz", hash = "sha256:8f95107fcf61c0d19fbfc35418a1e1c3ecd78c929d34f6382a9fb26b3ec8ccda"},
+    {file = "typing_tool-0.1.2-py3-none-any.whl", hash = "sha256:39375142aaed54e71e597fa4a93323ff42586d8567b4e52c5e75f815a04be262"},
+    {file = "typing_tool-0.1.2.tar.gz", hash = "sha256:9a1e16b523e0c7cb7ce4545ead7c3fe4f528518c36c8d79bd0df5afd18f927c6"},
 ]
 
 [[package]]

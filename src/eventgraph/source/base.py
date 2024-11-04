@@ -36,6 +36,8 @@ class BaseSource(Protocol[T, S, E]):
         dispatcher: Optional[Type[BaseDispatcher[S, E]]],
     ) -> None: ...
 
+    def merge(self, other: BaseSource[T, S, E]) -> None: ...
+
 
 class EventSource(Generic[B_T]):
     _queue: InstanceOfV[BaseQueue[BaseTask[B_T]]] = InstanceOf(PriorityQueue[B_T])
@@ -69,3 +71,7 @@ class EventSource(Generic[B_T]):
         dispatcher: Optional[Type[BaseDispatcher[EventSource[B_T], B_T]]],
     ):
         self._dispatcher_manager.remove_dispatcher(event, dispatcher)
+
+    def merge(self, other: EventSource[B_T]):
+        self._dispatcher_manager.merge(other._dispatcher_manager)
+        self._listener_manager.merge(other._listener_manager)

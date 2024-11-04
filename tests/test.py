@@ -8,6 +8,7 @@ from eventgraph.dispatcher.base import Dispatcher
 from eventgraph.exceptions import NoCatchArgs
 
 g = init_event_graph(int)
+g2 = init_event_graph(int)
 
 
 class Ts(int): ...
@@ -31,7 +32,12 @@ async def test2(a: Ts, b: str, c=1, d: Optional[EventGraph] = None):
     print(locals(), "test2")
 
 
-g.add_dispatcher(int, IntDispatcher)
+@g2.receiver(int)
+async def test3(a: int, b: str, c=1):
+    print(locals(), "test3")
+
+
+g2.add_dispatcher(int, IntDispatcher)
 
 
 async def mian():

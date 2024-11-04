@@ -50,6 +50,8 @@ class BaseDispatcherManager(Protocol[S, E]):
         dispatcher: Optional[Type[BaseDispatcher[S, E]]],
     ) -> None: ...
 
+    def merge(self, other: BaseDispatcherManager[S, E]) -> None: ...
+
 
 class Dispatcher(Generic[S, E]):
     @classmethod
@@ -75,18 +77,25 @@ class DispatcherManager(Generic[S, E]):
         self._dispatchers.append((event, dispatcher))
 
     def remove_dispatcher(
-            self,
-            event: Optional[Type[E]] = None,
-            dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
-        ) -> None:
-            to_remove = []
-            if event is not None:
-                for key, value in self._dispatchers:
-                    if key == event:
-                        to_remove.append((key, value))
-            if dispatcher is not None:
-                for key, value in self._dispatchers:
-                    if value == dispatcher:
-                        to_remove.append((key, value))
-            for item in to_remove:
-                self._dispatchers.remove(item)
+        self,
+        event: Optional[Type[E]] = None,
+        dispatcher: Optional[Type[BaseDispatcher[S, E]]] = None,
+    ) -> None:
+        to_remove = []
+        if event is not None:
+            for key, value in self._dispatchers:
+                if key == event:
+                    to_remove.append((key, value))
+        if dispatcher is not None:
+            for key, value in self._dispatchers:
+                if value == dispatcher:
+                    to_remove.append((key, value))
+        for item in to_remove:
+            self._dispatchers.remove(item)
+
+    def merge(self, other: DispatcherManager[S, E]) -> None:
+        if self._dispatchers is other._dispatchers:
+            return
+        for item in other._dispatchers:
+            if item not in self._dispatchers:
+                self._dispatchers.append(item)

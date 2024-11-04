@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable, Any, overload
 from dataclasses import dataclass
 
@@ -46,3 +48,10 @@ class ListenerManager:
 
         for listener in remove_listener:
             self.listeners.remove(listener)
+
+    def merge(self, other: ListenerManager):
+        if self.listeners is other.listeners:
+            return
+        for listener in other.listeners:
+            if listener not in self.listeners:
+                self.listeners.append(listener)
